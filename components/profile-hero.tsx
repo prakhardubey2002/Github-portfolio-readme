@@ -93,7 +93,12 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
             className="font-display flex items-center gap-2 text-lime-300 transition-colors hover:text-lime-200"
           >
             <SocialIcon icon={link.icon} />
-            <span>{link.label}</span>
+            <span className="flex flex-col leading-tight">
+              <span className="text-[10px] uppercase tracking-wide text-white/40">
+                {link.platform}
+              </span>
+              <span>{link.label}</span>
+            </span>
           </a>
         ))}
       </nav>

@@ -2,7 +2,15 @@ export interface SocialLink {
   label: string;
   href: string;
   icon: "globe" | "github" | "linkedin";
+  /** Shown in embed / profile UI (e.g. GitHub, LinkedIn). */
+  platform: string;
 }
+
+const SOCIAL_PLATFORM: Record<SocialLink["icon"], string> = {
+  globe: "Linktree",
+  github: "GitHub",
+  linkedin: "LinkedIn",
+};
 
 export interface ProfileConfig {
   name: string;
@@ -26,16 +34,28 @@ export const profileConfig: ProfileConfig = {
       label: "Saanjh2811",
       href: "https://linktr.ee/prakhardubey",
       icon: "globe",
+      platform: SOCIAL_PLATFORM.globe,
     },
     {
       label: "prakhardubey2002",
       href: "https://github.com/prakhardubey2002",
       icon: "github",
+      platform: SOCIAL_PLATFORM.github,
     },
     {
       label: "prakhar-dubey-2790b81b7",
       href: "https://www.linkedin.com/in/prakhar-dubey-2790b81b7",
       icon: "linkedin",
+      platform: SOCIAL_PLATFORM.linkedin,
     },
   ],
+};
+
+/** Hardcoded GitHub meta for README embed (no avatar). */
+export const embedProfileMeta = {
+  publicRepos: 124,
+  followers: 32,
+  following: 61,
+  company: "@RecootyInc",
+  location: "Indore India",
 };

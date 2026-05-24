@@ -1,6 +1,6 @@
 import { downloadStatsService } from "./download-stats.service";
 import { packageListService } from "./package-list.service";
-import type { NpmPackageStats } from "./types";
+import type { DailyDownload, NpmPackageStats } from "./types";
 
 /** Fast stats for README embed — skips lifetime chunking and daily ranges. */
 export interface EmbedStats {
@@ -12,6 +12,7 @@ export interface EmbedStats {
   weeklyAverage: number;
   monthlyAverage: number;
   packages: NpmPackageStats[];
+  dailyDownloads: DailyDownload[];
   fetchedAt: string;
 }
 
@@ -30,14 +31,16 @@ export class EmbedStatsService {
         weeklyAverage: 0,
         monthlyAverage: 0,
         packages: [],
+        dailyDownloads: [],
         fetchedAt: new Date().toISOString(),
       };
     }
 
-    const [weeklyMap, monthlyMap, yearMap] = await Promise.all([
+    const [weeklyMap, monthlyMap, yearMap, dailyDownloads] = await Promise.all([
       downloadStatsService.getBulkPointDownloads("last-week", packageNames),
       downloadStatsService.getBulkPointDownloads("last-month", packageNames),
       downloadStatsService.getBulkPointDownloads("last-year", packageNames),
+      downloadStatsService.getAggregatedDailyDownloads(packageNames),
     ]);
 
     const packages: NpmPackageStats[] = packageNames.map((name) => ({
@@ -71,6 +74,7 @@ export class EmbedStatsService {
       weeklyAverage: Math.round(totalWeeklyDownloads / 7),
       monthlyAverage: Math.round(totalMonthlyDownloads / 30),
       packages,
+      dailyDownloads,
       fetchedAt: new Date().toISOString(),
     };
   }
