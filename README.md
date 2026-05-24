@@ -54,6 +54,8 @@ Replace `YOUR_APP` with your Vercel URL (e.g. `readme-dashboard.vercel.app`):
 
 **Cache busting:** GitHub caches images. After redeploying, append `&v=2` to the image URL to force a refresh.
 
+
+
 ## API
 
 | Endpoint | Description |
