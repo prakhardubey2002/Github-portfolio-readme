@@ -1,4 +1,4 @@
-import { ImageResponse } from "@vercel/og";
+import { ImageResponse } from "next/og";
 import type { CSSProperties, ReactNode } from "react";
 import { NextRequest } from "next/server";
 import { formatNumber } from "@/lib/format";
@@ -13,7 +13,9 @@ import {
 } from "@/lib/embed/fonts";
 import { embedProfileMeta, profileConfig } from "@/lib/profile/config";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const W = 1200;
 const PAD = 32;
@@ -473,7 +475,7 @@ function buildEmbedLayout(
   );
 
   return {
-    height: Math.min(Math.max(height, 1200), 2400),
+    height: Math.min(Math.max(height, 1200), 1800),
     element,
   };
 }
@@ -526,15 +528,17 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("[embed]", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("[embed]", message);
     try {
       const { fonts } = await loadEmbedFonts();
-      return errorImage(
-        "Stats temporarily unavailable — retry in a minute",
-        fonts,
-      );
-    } catch {
-      return new Response("Embed failed", { status: 500 });
+      return errorImage(`Embed error: ${message.slice(0, 80)}`, fonts);
+    } catch (fontError) {
+      console.error("[embed] font fallback failed", fontError);
+      return new Response(`Embed failed: ${message}`, {
+        status: 500,
+        headers: { "Content-Type": "text/plain" },
+      });
     }
   }
 }

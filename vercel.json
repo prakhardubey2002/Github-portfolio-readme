@@ -1,7 +1,7 @@
 {
   "functions": {
     "app/api/embed/route.tsx": {
-      "maxDuration": 30
+      "maxDuration": 60
     },
     "app/api/stats/route.ts": {
       "maxDuration": 60
