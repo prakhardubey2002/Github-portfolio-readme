@@ -1,26 +1,90 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --lime: #c8f135;
+  --lime-muted: #a8d42a;
+  --lime-card: #d4f542;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-lime: var(--lime);
+  --color-lime-card: var(--lime-card);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: "Sans Forgetica", var(--font-geist-sans), system-ui, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.dashboard-bg {
+  background: #0a0a0a;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 90% 20%, rgba(200, 241, 53, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 10% 80%, rgba(200, 241, 53, 0.05), transparent);
+  background-attachment: fixed;
+}
+
+.profile-card {
+  background: linear-gradient(145deg, #d4f542 0%, #c8f135 50%, #b8e030 100%);
+  border: 1px solid rgba(200, 241, 53, 0.4);
+  box-shadow:
+    0 8px 32px rgba(200, 241, 53, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.profile-avatar-ring::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border: 1px solid rgba(200, 241, 53, 0.35);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.profile-crosshair {
+  border: 1px solid rgba(200, 241, 53, 0.35);
+  border-radius: 50%;
+  position: relative;
+}
+
+.profile-crosshair::before,
+.profile-crosshair::after {
+  content: "";
+  position: absolute;
+  background: rgba(200, 241, 53, 0.35);
+}
+
+.profile-crosshair::before {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
+}
+
+.profile-crosshair::after {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+.glass-card {
+  border: 1px solid rgba(200, 241, 53, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }

@@ -1,65 +1,141 @@
-import Image from "next/image";
+import { Suspense } from "react";
+import { DownloadsChart } from "@/components/downloads-chart";
+import { PackageList } from "@/components/package-list";
+import { ProfileHero } from "@/components/profile-hero";
+import { SectionHeading } from "@/components/section-heading";
+import { StatTile } from "@/components/stat-tile";
+import { GlassCard } from "@/components/glass-card";
+import { getResolvedProfile } from "@/lib/profile";
+import { resolveUsername, statsAggregator } from "@/lib/npm/stats-aggregator";
 
-export default function Home() {
+interface PageProps {
+  searchParams: Promise<{ user?: string }>;
+}
+
+async function NpmStatsSection({ username }: { username: string }) {
+  const stats = await statsAggregator.getStatsForUser(username);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <GlassCard>
+          <StatTile label="Packages" value={stats.packageCount} />
+        </GlassCard>
+        <GlassCard>
+          <StatTile
+            label="Total downloads"
+            value={stats.totalLifetimeDownloads}
+            sublabel="Since Jan 2015"
+          />
+        </GlassCard>
+        <GlassCard>
+          <StatTile
+            label="Weekly average"
+            value={stats.weeklyAverage}
+            sublabel="Downloads per day (7d)"
+          />
+        </GlassCard>
+        <GlassCard>
+          <StatTile
+            label="Monthly average"
+            value={stats.monthlyAverage}
+            sublabel="Downloads per day (30d)"
+          />
+        </GlassCard>
+      </div>
+
+      <GlassCard>
+        <h3 className="mb-3 text-sm font-medium text-lime-300/80">
+          Period totals
+        </h3>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div>
+            <p className="text-xs text-white/50">Last 7 days</p>
+            <p className="text-xl font-semibold text-white">
+              {stats.totalWeeklyDownloads.toLocaleString()}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-white/50">Last 30 days</p>
+            <p className="text-xl font-semibold text-white">
+              {stats.totalMonthlyDownloads.toLocaleString()}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-white/50">Lifetime (since 2015)</p>
+            <p className="text-xl font-semibold text-white">
+              {stats.totalLifetimeDownloads.toLocaleString()}
+            </p>
+          </div>
+        </div>
+      </GlassCard>
+
+      <DownloadsChart
+        packages={stats.packages}
+        dailyDownloads={stats.dailyDownloads}
+      />
+
+      <PackageList packages={stats.packages} />
+    </>
+  );
+}
+
+function NpmStatsSkeleton() {
+  return (
+    <div className="grid gap-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="h-28 animate-pulse rounded-2xl border border-lime-400/10 bg-white/5"
+          />
+        ))}
+      </div>
+      <div className="h-24 animate-pulse rounded-2xl border border-lime-400/10 bg-white/5" />
+      <div className="h-80 animate-pulse rounded-2xl border border-lime-400/10 bg-white/5" />
+      <div className="h-64 animate-pulse rounded-2xl border border-lime-400/10 bg-white/5" />
+    </div>
+  );
+}
+
+export default async function Home({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const profile = await getResolvedProfile();
+  const npmUsername = resolveUsername(params.user ?? profile.npmUsername);
+
+  return (
+    <div className="dashboard-bg min-h-screen px-4 py-10 sm:px-8">
+      <div className="mx-auto flex max-w-6xl flex-col gap-2">
+        <ProfileHero profile={profile} />
+
+        <SectionHeading
+          title="npm packages"
+          subtitle={`Author stats for @${npmUsername} · official npm registry`}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+
+        <Suspense fallback={<NpmStatsSkeleton />}>
+          <NpmStatsSection username={npmUsername} />
+        </Suspense>
+
+        <footer className="mt-8 flex flex-wrap justify-center gap-6 border-t border-white/10 pt-8 text-sm text-white/50">
           <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href={`https://www.npmjs.com/~${npmUsername}`}
             target="_blank"
             rel="noopener noreferrer"
+            className="text-lime-300 hover:text-lime-200"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
+            npm profile →
           </a>
           <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href={`https://github.com/${profile.githubUsername}`}
             target="_blank"
             rel="noopener noreferrer"
+            className="text-lime-300 hover:text-lime-200"
           >
-            Documentation
+            GitHub profile →
           </a>
-        </div>
-      </main>
+        </footer>
+      </div>
     </div>
   );
 }

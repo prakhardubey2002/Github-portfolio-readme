@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# npm README Glass Dashboard
 
-## Getting Started
+A glassmorphic Next.js dashboard that shows your **GitHub profile** (bio, avatar, social links) plus **official npm registry stats**, embeddable in your GitHub README as a wide preview image.
 
-First, run the development server:
+## Features
+
+- **Profile section** — tagline, bio, avatar (from GitHub API), social links, Sans Forgetica styling (matches your README aesthetic)
+- **npm stats** — total packages, lifetime downloads (since Jan 2015), weekly/monthly averages, period totals
+- **All packages** — full list with weekly, monthly, and lifetime downloads per package
+- Bar and line charts for all packages
+- README embed via PNG image (`/api/embed`) with profile + npm summary
+
+## Quick start
 
 ```bash
+npm install
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) or [http://localhost:3000/?user=prakhar_dubey](http://localhost:3000/?user=prakhar_dubey).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Variable | Description |
+|----------|-------------|
+| `NPM_USERNAME` | Default npm username (default: `prakhar_dubey`) |
+| `NEXT_PUBLIC_APP_URL` | Optional — your Vercel URL for docs |
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Push this repo to GitHub
+2. [Import on Vercel](https://vercel.com/new) (Next.js auto-detected)
+3. Add environment variable: `NPM_USERNAME=prakhar_dubey`
+4. Deploy and copy your production URL
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Paste in your GitHub README
+
+Replace `YOUR_APP` with your Vercel URL (e.g. `readme-dashboard.vercel.app`):
+
+```markdown
+## npm packages
+
+<p align="center">
+  <a href="https://YOUR_APP.vercel.app/?user=prakhar_dubey">
+    <img
+      src="https://YOUR_APP.vercel.app/api/embed?user=prakhar_dubey"
+      alt="npm package statistics for prakhar_dubey"
+      width="100%"
+    />
+  </a>
+</p>
+```
+
+**Cache busting:** GitHub caches images. After redeploying, append `&v=2` to the image URL to force a refresh.
+
+## API
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/stats?user=username` | JSON stats (cached 1 hour) |
+| `GET /api/embed?user=username` | PNG image for README embed |
+
+## Data sources
+
+- Package list: `registry.npmjs.org/-/v1/search?text=maintainer:{user}`
+- Downloads: `api.npmjs.org/downloads/point` and `/range`
+
+Lifetime totals sum 365-day chunks from January 10, 2015 (npm API limit).
